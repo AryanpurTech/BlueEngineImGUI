@@ -1,0 +1,15 @@
+[package]
+name = "blue_engine_imgui"
+version = "0.1.0"
+edition = "2021"
+description = "ImGUI library for Blue Engine"
+keywords = ["gui", "immediate mode", "ui", "blue_engine", "imgui", "game"]
+categories = ["gui", "immediate mode", "ui", "blue_engine", "imgui", "game"]
+repository = "https://github.com/AryanpurTech/BlueEngineImGUI"
+license = "Apache-2.0"
+
+[lib]
+name = "blue_engine_imgui"
+
+[dependencies]
+blue_engine = { path = "../Blue Engine" }
