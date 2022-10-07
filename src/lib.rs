@@ -1,10 +1,22 @@
 use blue_engine::{
-    Operations, RenderPassColorAttachment, RenderPassDescriptor, Renderer, TextureView,
-    UpdateEvents, Window as Win,
+    Camera, InputHelper, Object, Operations, RenderPassColorAttachment, RenderPassDescriptor,
+    Renderer, TextureView, UpdateEvents, Window as Win,
 };
 
 pub use imgui;
 use imgui::{FontSource, Ui};
+
+pub trait Gui {
+    fn update(
+        &mut self,
+        _window: &mut Win,
+        _renderer: &mut Renderer,
+        _objects: &mut std::collections::HashMap<&'static str, Object>,
+        _input: &blue_engine::InputHelper,
+        _camera: &mut Camera,
+        ui: &Ui,
+    );
+}
 
 pub struct ImGUI {
     pub context: imgui::Context,
@@ -55,13 +67,30 @@ impl ImGUI {
         }
     }
 
-    pub fn update<T: FnMut(&Ui, &mut Win, &mut Renderer) + 'static>(
+    /*
+    (
+                    &mut Renderer,
+                    &mut Window,
+                    &mut std::collections::HashMap<&'static str, Object>,
+                ),
+                // Utils
+                (
+                    &winit_input_helper::WinitInputHelper,
+                    &mut Camera,
+                    (&mut wgpu::CommandEncoder, &wgpu::TextureView),
+                    &mut Vec<T>,
+                ) */
+
+    pub fn update<T: Gui + 'static>(
         &mut self,
         window: &mut Win,
         renderer: &mut Renderer,
+        objects: &mut std::collections::HashMap<&'static str, Object>,
+        input: &InputHelper,
+        camera: &mut Camera,
         encoder: &mut blue_engine::CommandEncoder,
         view: &TextureView,
-        mut gui: T,
+        gui_struct: &mut T,
     ) {
         let now = std::time::Instant::now();
         self.context
@@ -75,7 +104,8 @@ impl ImGUI {
 
         let ui = self.context.frame();
 
-        gui(&ui, window, renderer);
+        gui_struct.update(window, renderer, objects, input, camera, &ui);
+        //gui(&ui, window, renderer, objects);
 
         let draw_data = ui.render();
 

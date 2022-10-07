@@ -16,3 +16,11 @@ blue_engine = { path = "../Blue Engine" }
 imgui-wgpu = { version = "0.20.0" }
 imgui-winit-support = { version = "0.8.1-alpha.0", path = "imgui-winit-support" }
 imgui = { version = "0.8.2" }
+
+[[example]]
+name = "hello_gui"
+path = "examples/hello_gui.rs"
+
+[[example]]
+name = "styling"
+path = "examples/styling.rs"
