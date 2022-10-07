@@ -12,7 +12,7 @@ license = "Apache-2.0"
 name = "blue_engine_imgui"
 
 [dependencies]
-blue_engine = { path = "../Blue Engine" }
+blue_engine = { version = "0.4.9" }
 imgui-wgpu = { version = "0.20.0" }
 imgui-winit-support = { version = "0.8.1-alpha.0", path = "imgui-winit-support" }
 imgui = { version = "0.8.2" }

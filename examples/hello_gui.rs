@@ -74,7 +74,7 @@ fn main() {
     };
 
     // Start the imgui context
-    let gui_context = blue_engine_imgui::ImGUI::init(&engine.window, &mut engine.renderer);
+    let gui_context = blue_engine_imgui::ImGUI::new(&engine.window, &mut engine.renderer);
 
     // Update loop
     engine

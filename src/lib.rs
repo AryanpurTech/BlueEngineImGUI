@@ -6,6 +6,8 @@ use blue_engine::{
 pub use imgui;
 use imgui::{FontSource, Ui};
 
+/// Allows you to write UI code understandable by this library.
+/// The only function is `update` function, passing all normal components as well as `ui`.
 pub trait Gui {
     fn update(
         &mut self,
@@ -18,6 +20,7 @@ pub trait Gui {
     );
 }
 
+/// The imgui plugin
 pub struct ImGUI {
     pub context: imgui::Context,
     pub platform: imgui_winit_support::WinitPlatform,
@@ -26,7 +29,8 @@ pub struct ImGUI {
 }
 
 impl ImGUI {
-    pub fn init(window: &Win, renderer: &mut Renderer) -> Self {
+    /// Creates the imgui context and platform details
+    pub fn new(window: &Win, renderer: &mut Renderer) -> Self {
         let mut imgui = imgui::Context::create();
         let mut platform = imgui_winit_support::WinitPlatform::init(&mut imgui);
 
@@ -67,20 +71,7 @@ impl ImGUI {
         }
     }
 
-    /*
-    (
-                    &mut Renderer,
-                    &mut Window,
-                    &mut std::collections::HashMap<&'static str, Object>,
-                ),
-                // Utils
-                (
-                    &winit_input_helper::WinitInputHelper,
-                    &mut Camera,
-                    (&mut wgpu::CommandEncoder, &wgpu::TextureView),
-                    &mut Vec<T>,
-                ) */
-
+    /// Updates the imgui with custom renderpass and renders UI code
     pub fn update<T: Gui + 'static>(
         &mut self,
         window: &mut Win,
@@ -134,6 +125,7 @@ impl ImGUI {
 }
 
 impl UpdateEvents for ImGUI {
+    /// updates the inputs and events
     fn update_events<T>(
         &mut self,
         _renderer: &mut Renderer,
@@ -151,6 +143,7 @@ impl UpdateEvents for ImGUI {
 
 // ===============================================================================================
 
+/// custom dark theme
 fn imgui_redesign(imgui: &mut imgui::Context, hidpi_factor: f64) {
     let font_size = (13.0 * hidpi_factor) as f32;
 
