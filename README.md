@@ -20,11 +20,10 @@ impl Gui for MyGUI {
     fn update(
         // for accessing the values
         &mut self,
+        // We can add underscore to ones we don't use, so they won't emit warnings
         _window: &mut blue_engine::Window,
         _renderer: &mut blue_engine::Renderer,
-        // We can add underscore to ones we don't use, so they won't emit warnings
-        objects: &mut std::collections::HashMap<&'static str, blue_engine::Object>,
-        _input: &blue_engine::InputHelper,
+        _objects: &mut std::collections::HashMap<&'static str, blue_engine::Object>,
         _camera: &mut blue_engine::Camera,
         ui: &blue_engine_imgui::winit::Ui,
     ) {
@@ -39,41 +38,28 @@ And finally your ImGUI code:
 // Create a new imgui window to contain the UI
 gui::Window::new("Counter Window").build(ui, || {
     // Add a text to display the counter
-    ui.text(format!("The count is at: {}", self.counter));\
+    ui.text(format!("The count is at: {}", self.count));
     
     // + 1 per click
     if ui.button("Add 1") {
-        self.counter += 1;
+        self.count += 1;
     }
 });
 ```
 
-A few more steps are left to be done to have the plugin working. First we need to initialize the plugin before update loop:
+One more steps is left to be done to have the plugin working. We need to initialize the plugin before update loop:
 
 ```rust
-let gui_context = blue_engine_imgui::ImGUI::new(&engine.window, &mut engine.renderer);
+let gui_context = blue_engine_imgui::ImGUI::new(&engine.window, &mut engine.renderer, Box::new(MyGui {count: 0}));
 ```
 
-This will essentially initializes the imgui and create things required to run the plugin. Next step is inside the update loop, we'll need to update the plugin with encoder so that it can create a renderpass for displaying the UI. Here we will pass our UI struct as well:
+This will essentially initializes the imgui and create things required to run the plugin. The engine will then run it twice, once before everything else to fetch all inputs and events, and then during render, so that it displays the GUI. And all that's left, is to add the plugin to the engine:
 
 ```rust
-// Here we update the imgui context every frame
-event_fetchers[0].update(
-    window,
-    renderer,
-    objects,
-    input,
-    camera,
-    encoder,
-    view,
-    // This is where you add your gui struct
-    &mut my_gui,
-);
+engine.plugins.push(Box::new(gui_context));
 ```
 
-> The `event_fetchers` is the last component in second list in update loop: [ [ _, _, _ ] , [ _, _, _, event_fetcher ] ]
-
-And finally, last step is to add the context too the list of event fetchers, so that it'll get access to all the events immediately and fetch all inputs.
+Congrats now you have a working GUI!
 
 ## Style Block
 
