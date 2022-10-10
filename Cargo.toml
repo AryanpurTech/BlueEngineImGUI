@@ -1,10 +1,10 @@
 [package]
 name = "blue_engine_imgui"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "ImGUI library for Blue Engine"
-keywords = ["gui", "immediate mode", "ui", "blue_engine", "imgui", "game"]
-categories = ["gui", "immediate mode", "ui", "blue_engine", "imgui", "game"]
+keywords = ["gui", "blue_engine", "imgui"]
+categories = ["gui", "game-development", "game-engines", "rendering", "game"]
 repository = "https://github.com/AryanpurTech/BlueEngineImGUI"
 license = "Apache-2.0"
 
@@ -12,7 +12,7 @@ license = "Apache-2.0"
 name = "blue_engine_imgui"
 
 [dependencies]
-blue_engine = { version = "0.4.9" }
+blue_engine = { version = "0.4.11" }
 imgui-wgpu = { version = "0.20.0" }
 imgui-winit-support = { version = "0.8.1-alpha.0", path = "imgui-winit-support" }
 imgui = { version = "0.8.2" }

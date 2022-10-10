@@ -1,6 +1,6 @@
 use blue_engine::{
-    Camera, InputHelper, Object, Operations, RenderPassColorAttachment, RenderPassDescriptor,
-    Renderer, TextureView, UpdateEvents, Window as Win,
+    Camera, EnginePlugin, Object, Operations, RenderPassColorAttachment, RenderPassDescriptor,
+    Renderer, Window as Win,
 };
 
 pub use imgui;
@@ -11,10 +11,9 @@ use imgui::{FontSource, Ui};
 pub trait Gui {
     fn update(
         &mut self,
-        _window: &mut Win,
+        _window: &Win,
         _renderer: &mut Renderer,
         _objects: &mut std::collections::HashMap<&'static str, Object>,
-        _input: &blue_engine::InputHelper,
         _camera: &mut Camera,
         ui: &Ui,
     );
@@ -26,11 +25,12 @@ pub struct ImGUI {
     pub platform: imgui_winit_support::WinitPlatform,
     pub renderer: imgui_wgpu::Renderer,
     pub last_frame: std::time::Instant,
+    pub gui: Box<dyn Gui>,
 }
 
 impl ImGUI {
     /// Creates the imgui context and platform details
-    pub fn new(window: &Win, renderer: &mut Renderer) -> Self {
+    pub fn new(window: &Win, renderer: &mut Renderer, gui: Box<dyn Gui>) -> Self {
         let mut imgui = imgui::Context::create();
         let mut platform = imgui_winit_support::WinitPlatform::init(&mut imgui);
 
@@ -68,20 +68,37 @@ impl ImGUI {
             platform,
             renderer: imgui_renderer,
             last_frame,
+            gui,
+        }
+    }
+}
+
+impl EnginePlugin for ImGUI {
+    /// updates the inputs and events
+    fn update_events(
+        &mut self,
+        _renderer: &mut Renderer,
+        _window: &Win,
+        _objects: &mut std::collections::HashMap<&'static str, Object>,
+        _events: &blue_engine::Event<()>,
+        _input: &blue_engine::InputHelper,
+        _camera: &mut Camera,
+    ) {
+        if _renderer.surface.is_some() {
+            self.platform
+                .handle_event(self.context.io_mut(), &_window, &_events);
         }
     }
 
     /// Updates the imgui with custom renderpass and renders UI code
-    pub fn update<T: Gui + 'static>(
+    fn update(
         &mut self,
-        window: &mut Win,
         renderer: &mut Renderer,
+        window: &Win,
         objects: &mut std::collections::HashMap<&'static str, Object>,
-        input: &InputHelper,
         camera: &mut Camera,
         encoder: &mut blue_engine::CommandEncoder,
-        view: &TextureView,
-        gui_struct: &mut T,
+        view: &blue_engine::TextureView,
     ) {
         let now = std::time::Instant::now();
         self.context
@@ -95,7 +112,7 @@ impl ImGUI {
 
         let ui = self.context.frame();
 
-        gui_struct.update(window, renderer, objects, input, camera, &ui);
+        self.gui.update(window, renderer, objects, camera, &ui);
         //gui(&ui, window, renderer, objects);
 
         let draw_data = ui.render();
@@ -124,24 +141,30 @@ impl ImGUI {
     }
 }
 
-impl UpdateEvents for ImGUI {
-    /// updates the inputs and events
-    fn update_events<T>(
-        &mut self,
-        _renderer: &mut Renderer,
-        _window: &Win,
-        _objects: &mut std::collections::HashMap<&'static str, blue_engine::Object>,
-        _events: &blue_engine::Event<T>,
-        _camera: &mut blue_engine::Camera,
-    ) {
-        if _renderer.surface.is_some() {
-            self.platform
-                .handle_event(self.context.io_mut(), &_window, &_events);
-        }
-    }
+// ===============================================================================================
+pub enum Style {
+    Config(imgui::StyleVar),
+    Color(imgui::StyleColor, [f32; 4]),
 }
 
-// ===============================================================================================
+pub fn style_block<F: FnMut()>(styles: Vec<Style>, mut ui_block: F, ui: &imgui::Ui) {
+    let mut stack = Vec::<imgui::StyleStackToken>::new();
+    let mut color = Vec::<imgui::ColorStackToken>::new();
+
+    for i in styles {
+        match i {
+            Style::Config(data) => stack.push(ui.push_style_var(data)),
+            Style::Color(data, hue) => color.push(ui.push_style_color(data, hue)),
+        }
+    }
+    ui_block();
+    for i in stack {
+        i.end();
+    }
+    for i in color {
+        i.end();
+    }
+}
 
 /// custom dark theme
 fn imgui_redesign(imgui: &mut imgui::Context, hidpi_factor: f64) {
