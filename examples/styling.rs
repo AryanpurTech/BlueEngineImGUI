@@ -29,6 +29,8 @@ impl Gui for MyGUI {
         _renderer: &mut blue_engine::Renderer,
         _objects: &mut std::collections::HashMap<&'static str, blue_engine::Object>,
         _camera: &mut blue_engine::Camera,
+        _input: &blue_engine::InputHelper,
+        _plugin_data_storage: &mut std::collections::HashMap<&'static str, Box<dyn std::any::Any>>,
         ui: &gui::Ui,
     ) {
         // Create a ui window
@@ -88,6 +90,6 @@ fn main() {
 
     // update loop
     engine
-        .update_loop(|_, _, _, _, _| {})
+        .update_loop(|_, _, _, _, _, _| {})
         .expect("Error during update loop");
 }

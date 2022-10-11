@@ -15,6 +15,8 @@ pub trait Gui {
         _renderer: &mut Renderer,
         _objects: &mut std::collections::HashMap<&'static str, Object>,
         _camera: &mut Camera,
+        _input: &blue_engine::InputHelper,
+        _plugin_data_storage: &mut std::collections::HashMap<&'static str, Box<dyn std::any::Any>>,
         ui: &Ui,
     );
 }
@@ -93,10 +95,12 @@ impl EnginePlugin for ImGUI {
     /// Updates the imgui with custom renderpass and renders UI code
     fn update(
         &mut self,
-        renderer: &mut Renderer,
-        window: &Win,
-        objects: &mut std::collections::HashMap<&'static str, Object>,
-        camera: &mut Camera,
+        renderer: &mut blue_engine::Renderer,
+        window: &blue_engine::Window,
+        objects: &mut std::collections::HashMap<&'static str, blue_engine::Object>,
+        camera: &mut blue_engine::Camera,
+        input: &blue_engine::InputHelper,
+        plugin_data_storage: &mut std::collections::HashMap<&'static str, Box<dyn std::any::Any>>,
         encoder: &mut blue_engine::CommandEncoder,
         view: &blue_engine::TextureView,
     ) {
@@ -112,7 +116,15 @@ impl EnginePlugin for ImGUI {
 
         let ui = self.context.frame();
 
-        self.gui.update(window, renderer, objects, camera, &ui);
+        self.gui.update(
+            window,
+            renderer,
+            objects,
+            camera,
+            input,
+            plugin_data_storage,
+            &ui,
+        );
         //gui(&ui, window, renderer, objects);
 
         let draw_data = ui.render();

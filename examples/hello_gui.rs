@@ -30,6 +30,8 @@ impl Gui for MyGUI {
         // We can add underscore to ones we don't use, so they won't emit warnings
         objects: &mut std::collections::HashMap<&'static str, blue_engine::Object>,
         _camera: &mut blue_engine::Camera,
+        _input: &blue_engine::InputHelper,
+        _plugin_data_storage: &mut std::collections::HashMap<&'static str, Box<dyn std::any::Any>>,
         ui: &gui::Ui,
     ) {
         // Start by creating a UI window inside your app
@@ -81,6 +83,6 @@ fn main() {
 
     // Update loop
     engine
-        .update_loop(move |_, _, _, _, _| {})
+        .update_loop(move |_, _, _, _, _, _| {})
         .expect("Error during update loop");
 }
