@@ -1,6 +1,6 @@
 [package]
 name = "blue_engine_imgui"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2021"
 description = "ImGUI library for Blue Engine"
 keywords = ["gui", "blue_engine", "imgui"]
