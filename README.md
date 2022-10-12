@@ -1,6 +1,14 @@
 # Blue Engine ImGUI plugin
 
-This is a plugin that adds [ImGUI](https://github.com/ocornut/imgui) support to the [Blue Engine](https://githb.com/AryanpurTech/BlueEngine).
+This is a plugin that adds [ImGUI](https://github.com/ocornut/imgui) support to the [Blue Engine](https://github.com/AryanpurTech/BlueEngine).
+
+## Setup
+
+Please refrain from using the crates version of this plugin. Instead use this github repository directly:
+
+```toml
+blue_engine_imgui = { git = "https://github.com/AryanpurTech/BlueEngineImGUI" }
+```
 
 ## Getting started
 
