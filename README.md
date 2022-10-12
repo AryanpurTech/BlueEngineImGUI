@@ -38,7 +38,7 @@ And finally your ImGUI code:
 
 ```rust
 // Create a new imgui window to contain the UI
-gui::Window::new("Counter Window").build(ui, || {
+ui.window("Counter Window").build(|| {
     // Add a text to display the counter
     ui.text(format!("The count is at: {}", self.count));
     

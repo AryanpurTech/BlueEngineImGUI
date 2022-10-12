@@ -35,22 +35,22 @@ impl Gui for MyGUI {
         ui: &gui::Ui,
     ) {
         // Start by creating a UI window inside your app
-        gui::Window::new("Control Triangle")
+        ui.window("Control Triangle")
             // Not resizable
             .resizable(false)
             // Let's start adding our UI
-            .build(&ui, || {
+            .build(|| {
                 // We want a color selector
-                gui::ColorEdit::new(
+                ui.color_edit4_config(
                     // Label for the picker
                     "Pick a color",
                     // Pass in the predefined variable to store the value
-                    gui::EditableColor::Float4(&mut self.color),
+                    &mut self.color,
                 )
                 .inputs(false)
                 .alpha(true)
                 .alpha_bar(true)
-                .build(&ui);
+                .build();
             });
 
         // Here we apply the fetched data by changing colors of the triangle

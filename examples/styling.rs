@@ -34,7 +34,7 @@ impl Gui for MyGUI {
         ui: &gui::Ui,
     ) {
         // Create a ui window
-        gui::Window::new("Styling Buttons").build(&ui, || {
+        ui.window("Styling Buttons").build(|| {
             ui.set_window_font_scale(1.5f32);
             // ========= BLUE ======== //
             style_block(

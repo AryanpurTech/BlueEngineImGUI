@@ -127,7 +127,7 @@ impl EnginePlugin for ImGUI {
         );
         //gui(&ui, window, renderer, objects);
 
-        let draw_data = ui.render();
+        let draw_data = self.context.render();
 
         let mut render_pass = encoder.begin_render_pass(&RenderPassDescriptor {
             label: Some("Render pass"),
