@@ -1,6 +1,6 @@
 [package]
 name = "blue_engine_imgui"
-version = "0.4.0"
+version = "0.4.2"
 edition = "2021"
 description = "ImGUI library for Blue Engine"
 keywords = ["gui", "blue_engine", "imgui"]
@@ -12,10 +12,10 @@ license = "Apache-2.0"
 name = "blue_engine_imgui"
 
 [dependencies]
-blue_engine = { version = "0.4.14" }
-imgui-wgpu = { path = "imgui-wgpu-rs" }
-imgui-winit-support = { version = "0.8.1-alpha.0", path = "imgui-winit-support" }
-imgui = { path = "imgui-rs/imgui", features = ["docking"] }
+blue_engine = { version = "0.4", default-features = false }
+imgui-wgpu = { path = "./imgui-wgpu-rs" }
+imgui-winit-support = { path = "./imgui-winit-support" }
+imgui = { path = "./imgui-rs/imgui", features = ["docking"] }
 
 [[example]]
 name = "hello_gui"

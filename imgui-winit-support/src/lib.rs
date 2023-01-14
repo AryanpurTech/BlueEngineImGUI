@@ -76,6 +76,9 @@
 use imgui::{self, BackendFlags, ConfigFlags, Context, Io, Key, Ui};
 use std::cell::Cell;
 use std::cmp::Ordering;
+
+// Re-export winit to make it easier for users to use the correct version.
+pub use winit;
 use winit::dpi::{LogicalPosition, LogicalSize};
 
 use winit::{
@@ -458,7 +461,7 @@ impl WinitPlatform {
                 if !newly_focused {
                     // Set focus-lost to avoid stuck keys (like 'alt'
                     // when alt-tabbing)
-                    //io.app_focus_lost = true;
+                    io.app_focus_lost = true;
                 }
             }
             _ => (),

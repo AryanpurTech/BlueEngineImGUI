@@ -4,6 +4,7 @@ use imgui::{
 use smallvec::SmallVec;
 use std::fmt;
 use std::mem::size_of;
+use std::sync::Arc;
 use std::{error::Error, num::NonZeroU32};
 use wgpu::util::{BufferInitDescriptor, DeviceExt};
 use wgpu::*;
@@ -44,6 +45,16 @@ enum ShaderStage {
     Vertex,
     Fragment,
     Compute,
+}
+
+/// Config for creating a texture from raw parts
+///
+#[derive(Clone)]
+pub struct RawTextureConfig<'a> {
+    /// An optional label for the bind group used for debugging.
+    pub label: Option<&'a str>,
+    /// The sampler descriptor of the texture.
+    pub sampler_desc: SamplerDescriptor<'a>,
 }
 
 /// Config for creating a texture.
@@ -106,20 +117,48 @@ impl<'a> Default for TextureConfig<'a> {
 
 /// A container for a bindable texture.
 pub struct Texture {
-    texture: wgpu::Texture,
-    view: wgpu::TextureView,
-    bind_group: BindGroup,
+    texture: Arc<wgpu::Texture>,
+    view: Arc<wgpu::TextureView>,
+    bind_group: Arc<BindGroup>,
     size: Extent3d,
 }
 
 impl Texture {
     /// Create a `Texture` from its raw parts.
+    /// - `bind_group`: The bind group used by the texture. If it is `None`, the bind group will be created like in `Self::new`.
+    /// - `config`: The config used for creating the bind group. If `bind_group` is `Some(_)`, it will be ignored
     pub fn from_raw_parts(
-        texture: wgpu::Texture,
-        view: wgpu::TextureView,
-        bind_group: BindGroup,
+        device: &Device,
+        renderer: &Renderer,
+        texture: Arc<wgpu::Texture>,
+        view: Arc<wgpu::TextureView>,
+        bind_group: Option<Arc<BindGroup>>,
+        config: Option<&RawTextureConfig>,
         size: Extent3d,
     ) -> Self {
+        let bind_group = bind_group.unwrap_or_else(|| {
+            let config = config.unwrap();
+
+            // Create the texture sampler.
+            let sampler = device.create_sampler(&config.sampler_desc);
+
+            // Create the texture bind group from the layout.
+            Arc::new(device.create_bind_group(&BindGroupDescriptor {
+                label: config.label,
+                layout: &renderer.texture_layout,
+                entries: &[
+                    BindGroupEntry {
+                        binding: 0,
+                        resource: BindingResource::TextureView(&view),
+                    },
+                    BindGroupEntry {
+                        binding: 1,
+                        resource: BindingResource::Sampler(&sampler),
+                    },
+                ],
+            }))
+        });
+
         Self {
             texture,
             view,
@@ -131,7 +170,7 @@ impl Texture {
     /// Create a new GPU texture width the specified `config`.
     pub fn new(device: &Device, renderer: &Renderer, config: TextureConfig) -> Self {
         // Create the wgpu texture.
-        let texture = device.create_texture(&TextureDescriptor {
+        let texture = Arc::new(device.create_texture(&TextureDescriptor {
             label: config.label,
             size: config.size,
             mip_level_count: config.mip_level_count,
@@ -139,16 +178,16 @@ impl Texture {
             dimension: config.dimension,
             format: config.format.unwrap_or(renderer.config.texture_format),
             usage: config.usage,
-        });
+        }));
 
         // Extract the texture view.
-        let view = texture.create_view(&TextureViewDescriptor::default());
+        let view = Arc::new(texture.create_view(&TextureViewDescriptor::default()));
 
         // Create the texture sampler.
         let sampler = device.create_sampler(&config.sampler_desc);
 
         // Create the texture bind group from the layout.
-        let bind_group = device.create_bind_group(&BindGroupDescriptor {
+        let bind_group = Arc::new(device.create_bind_group(&BindGroupDescriptor {
             label: config.label,
             layout: &renderer.texture_layout,
             entries: &[
@@ -161,7 +200,7 @@ impl Texture {
                     resource: BindingResource::Sampler(&sampler),
                 },
             ],
-        });
+        }));
 
         Self {
             texture,
@@ -509,10 +548,10 @@ impl Renderer {
         }
 
         // Only update matrices if the size or position changes
-        if (render_data.last_size[0] - draw_data.display_size[0]).abs() > std::f32::EPSILON
-            || (render_data.last_size[1] - draw_data.display_size[1]).abs() > std::f32::EPSILON
-            || (render_data.last_pos[0] - draw_data.display_pos[0]).abs() > std::f32::EPSILON
-            || (render_data.last_pos[1] - draw_data.display_pos[1]).abs() > std::f32::EPSILON
+        if (render_data.last_size[0] - draw_data.display_size[0]).abs() > f32::EPSILON
+            || (render_data.last_size[1] - draw_data.display_size[1]).abs() > f32::EPSILON
+            || (render_data.last_pos[0] - draw_data.display_pos[0]).abs() > f32::EPSILON
+            || (render_data.last_pos[1] - draw_data.display_pos[1]).abs() > f32::EPSILON
         {
             render_data.fb_size = [fb_width, fb_height];
             render_data.last_size = draw_data.display_size;
@@ -528,7 +567,7 @@ impl Renderer {
             // This is required to adapt to vulkan coordinates.
             let matrix = [
                 [2.0 / width, 0.0, 0.0, 0.0],
-                [0.0, 2.0 / -height as f32, 0.0, 0.0],
+                [0.0, 2.0 / -height, 0.0, 0.0],
                 [0.0, 0.0, 1.0, 0.0],
                 [-1.0 - offset_x * 2.0, 1.0 + offset_y * 2.0, 0.0, 1.0],
             ];

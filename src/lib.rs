@@ -1,25 +1,10 @@
 use blue_engine::{
-    Camera, EnginePlugin, Object, Operations, RenderPassColorAttachment, RenderPassDescriptor,
-    Renderer, Window as Win,
+    Camera, EnginePlugin, Operations, RenderPassColorAttachment, RenderPassDescriptor,
+    Renderer, Window as Win, ObjectStorage,
 };
 
 pub use imgui;
-use imgui::{FontSource, Ui};
-
-/// Allows you to write UI code understandable by this library.
-/// The only function is `update` function, passing all normal components as well as `ui`.
-pub trait Gui {
-    fn update(
-        &mut self,
-        _window: &Win,
-        _renderer: &mut Renderer,
-        _objects: &mut std::collections::HashMap<&'static str, Object>,
-        _camera: &mut Camera,
-        _input: &blue_engine::InputHelper,
-        _plugin_data_storage: &mut std::collections::HashMap<&'static str, Box<dyn std::any::Any>>,
-        ui: &Ui,
-    );
-}
+use imgui::{FontSource};
 
 /// The imgui plugin
 pub struct ImGUI {
@@ -27,12 +12,12 @@ pub struct ImGUI {
     pub platform: imgui_winit_support::WinitPlatform,
     pub renderer: imgui_wgpu::Renderer,
     pub last_frame: std::time::Instant,
-    pub gui: Box<dyn Gui>,
+    pub draw_data: Option<imgui::DrawData>,
 }
 
 impl ImGUI {
     /// Creates the imgui context and platform details
-    pub fn new(window: &Win, renderer: &mut Renderer, gui: Box<dyn Gui>) -> Self {
+    pub fn new(window: &Win, renderer: &mut Renderer) -> Self {
         let mut imgui = imgui::Context::create();
         let mut platform = imgui_winit_support::WinitPlatform::init(&mut imgui);
 
@@ -70,8 +55,12 @@ impl ImGUI {
             platform,
             renderer: imgui_renderer,
             last_frame,
-            gui,
+            draw_data: None,
         }
+    }
+
+    pub fn ui<F: FnOnce(&mut imgui::Ui)>(&mut self, callback: F) {
+        callback(self.context.frame());
     }
 }
 
@@ -81,7 +70,7 @@ impl EnginePlugin for ImGUI {
         &mut self,
         _renderer: &mut Renderer,
         _window: &Win,
-        _objects: &mut std::collections::HashMap<&'static str, Object>,
+        _objects: &mut ObjectStorage,
         _events: &blue_engine::Event<()>,
         _input: &blue_engine::InputHelper,
         _camera: &mut Camera,
@@ -97,10 +86,9 @@ impl EnginePlugin for ImGUI {
         &mut self,
         renderer: &mut blue_engine::Renderer,
         window: &blue_engine::Window,
-        objects: &mut std::collections::HashMap<&'static str, blue_engine::Object>,
-        camera: &mut blue_engine::Camera,
-        input: &blue_engine::InputHelper,
-        plugin_data_storage: &mut std::collections::HashMap<&'static str, Box<dyn std::any::Any>>,
+        _objects: &mut ObjectStorage,
+        _camera: &mut blue_engine::Camera,
+        _input: &blue_engine::InputHelper,
         encoder: &mut blue_engine::CommandEncoder,
         view: &blue_engine::TextureView,
     ) {
@@ -113,19 +101,6 @@ impl EnginePlugin for ImGUI {
         self.platform
             .prepare_frame(self.context.io_mut(), &window)
             .expect("Failed to prepare frame");
-
-        let ui = self.context.frame();
-
-        self.gui.update(
-            window,
-            renderer,
-            objects,
-            camera,
-            input,
-            plugin_data_storage,
-            &ui,
-        );
-        //gui(&ui, window, renderer, objects);
 
         let draw_data = self.context.render();
 

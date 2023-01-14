@@ -1,0 +1,7 @@
+/home/elhamaryanpur/Desktop/Projects/Blue Engine/blue_engine_imgui/imgui-winit-support/target/debug/deps/log-29b6eba9287e1897.rmeta: /home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/lib.rs /home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/macros.rs /home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/serde.rs
+
+/home/elhamaryanpur/Desktop/Projects/Blue Engine/blue_engine_imgui/imgui-winit-support/target/debug/deps/log-29b6eba9287e1897.d: /home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/lib.rs /home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/macros.rs /home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/serde.rs
+
+/home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/lib.rs:
+/home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/macros.rs:
+/home/elhamaryanpur/.cargo/registry/src/github.com-1ecc6299db9ec823/log-0.4.17/src/serde.rs:
